@@ -56,14 +56,40 @@ class GameLogic
   def play_game
     player = Player.new
     secret_word = list_of_possible_words.sample
-    puts secret_word
     current_word_progress = Array.new(secret_word.length, '_').join
-    puts current_word_progress.chars.join(' ')
+    player_has_won = false
+    incorrect_guesses_left = 6
+    number_of_turns_played = 1
 
-    player_guess = player.make_guess
-    current_word_progress = compare_guess_with_secret_word(player_guess, secret_word, current_word_progress)
-    puts ''
-    puts current_word_progress.chars.join(' ')
+    while incorrect_guesses_left.positive?
+      puts "\n----------------------------------------------------------------"
+      puts "Turn #{number_of_turns_played}"
+      number_of_turns_played += 1
+
+      puts "\n"
+      puts current_word_progress.chars.join(' ')
+
+      puts "\n\nYou have #{incorrect_guesses_left} incorrect guesses left."
+
+      player_guess = player.make_guess
+
+      previous_word_progress = current_word_progress
+      current_word_progress = compare_guess_with_secret_word(player_guess, secret_word, current_word_progress)
+
+      if current_word_progress == previous_word_progress
+        incorrect_guesses_left -= 1
+      end
+
+      if current_word_progress == secret_word
+        player_has_won = true
+        break
+      end
+    end
+
+    puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    puts player_has_won ? 'You win!' : 'You lose!'
+
+    puts "The secret word was #{secret_word}"
   end
 end
 
