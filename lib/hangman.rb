@@ -60,6 +60,7 @@ class GameLogic
     player_has_won = false
     incorrect_guesses_left = 6
     number_of_turns_played = 1
+    incorrect_letters_guessed = []
 
     while incorrect_guesses_left.positive?
       puts "\n----------------------------------------------------------------"
@@ -69,7 +70,11 @@ class GameLogic
       puts "\n"
       puts current_word_progress.chars.join(' ')
 
-      puts "\n\nYou have #{incorrect_guesses_left} incorrect guesses left."
+      unless incorrect_letters_guessed.empty?
+        puts "\n\nIncorrect letters: #{incorrect_letters_guessed.join(', ')}"
+      end
+
+      puts "\nYou have #{incorrect_guesses_left} incorrect guesses left."
 
       player_guess = player.make_guess
 
@@ -78,6 +83,7 @@ class GameLogic
 
       if current_word_progress == previous_word_progress
         incorrect_guesses_left -= 1
+        incorrect_letters_guessed.push(player_guess) if player_guess.length == 1
       end
 
       if current_word_progress == secret_word
