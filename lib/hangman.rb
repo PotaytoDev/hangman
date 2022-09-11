@@ -25,6 +25,30 @@ def take_player_guess
   validate_player_guess(gets.chomp.downcase)
 end
 
+def compare_guess_with_secret_word(player_guess, secret_word, current_word_progress)
+  secret_word = secret_word.chars
+  current_word_progress = current_word_progress.chars
+
+  if player_guess.length == 1 && secret_word.include?(player_guess)
+    secret_word.each_with_index do |letter, index|
+      if letter == player_guess
+        current_word_progress[index] = letter
+      end
+    end
+  else
+    if player_guess == secret_word.join
+      current_word_progress = secret_word
+    end
+  end
+
+  current_word_progress.join
+end
+
 secret_word = list_of_possible_words.sample
 puts secret_word
-puts "You entered #{take_player_guess}"
+current_word_progress = Array.new(secret_word.length, '_').join
+
+puts current_word_progress.chars.join(' ')
+player_guess = take_player_guess
+current_word_progress = compare_guess_with_secret_word(player_guess, secret_word, current_word_progress)
+puts current_word_progress.chars.join(' ')
