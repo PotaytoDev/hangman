@@ -124,6 +124,7 @@ class GameLogic
           play_game
           break
         when '2'
+          reset_game
           load_game('save_file.txt')
           play_game
           break
@@ -134,7 +135,7 @@ class GameLogic
 
       unless play_again?
         puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        puts "Game Over"
+        puts 'Game Over'
         puts "\nSee you next time!"
         break
       end
@@ -161,6 +162,21 @@ class GameLogic
 
       if player_guess == '0'
         save_game('save_file.txt')
+        puts "\nGame saved!"
+
+        loop do
+          puts "\nWould you like to quit? (Y/N)"
+
+          case gets.chomp.downcase
+          when 'y', 'yes'
+            return
+          when 'n', 'no'
+            break
+          else
+            puts 'Invalid input. Please enter y for yes and n for no.'
+          end
+        end
+
         redo
       end
 
