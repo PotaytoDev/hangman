@@ -35,6 +35,7 @@ class GameLogic
     @incorrect_guesses_left = 6
     @number_of_turns_played = 1
     @incorrect_letters_guessed = []
+    @game_was_saved = false
   end
 
   def list_of_possible_words
@@ -161,6 +162,7 @@ class GameLogic
       player_guess = player.make_guess
 
       if player_guess == '0'
+        @game_was_saved = true
         save_game('save_file.txt')
         puts "\nGame saved!"
 
@@ -198,7 +200,7 @@ class GameLogic
 
     puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     puts @player_has_won ? 'You win!' : 'You lose!'
-    puts "The secret word was \"#{@secret_word}\""
+    puts "The secret word was \"#{@secret_word}\"" unless @game_was_saved && !@player_has_won
     puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   end
 end
