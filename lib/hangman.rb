@@ -126,7 +126,14 @@ class GameLogic
           break
         when '2'
           reset_game
-          load_game('save_file.txt')
+
+          if File.exist?('save_file.txt')
+            load_game('save_file.txt')
+          else
+            puts 'There is no saved game. Please start a new game.'
+            redo
+          end
+
           play_game
           break
         else
