@@ -1,3 +1,5 @@
+require 'json'
+
 class Player
   attr_reader :player_guess
 
@@ -26,6 +28,16 @@ class Player
 end
 
 class GameLogic
+  def initialize
+    @player = Player.new
+    @secret_word = list_of_possible_words.sample
+    @current_word_progress = Array.new(@secret_word.length, '_').join
+    @player_has_won = false
+    @incorrect_guesses_left = 6
+    @number_of_turns_played = 1
+    @incorrect_letters_guessed = []
+  end
+
   def list_of_possible_words
     possible_words = File.readlines('google-10000-english-no-swears.txt')
     possible_words.select! do |word|
@@ -53,49 +65,58 @@ class GameLogic
     current_word_progress.join
   end
 
-  def play_game
-    player = Player.new
-    secret_word = list_of_possible_words.sample
-    current_word_progress = Array.new(secret_word.length, '_').join
-    player_has_won = false
-    incorrect_guesses_left = 6
-    number_of_turns_played = 1
-    incorrect_letters_guessed = []
+  def to_json
+    hash = {}
+    instance_variables.each do |variable|
+      hash[variable] = instance_variable_get(variable)
+    end
+    hash.to_json
+  end
 
-    while incorrect_guesses_left.positive?
+  def from_json(json_string)
+    JSON.parse(json_string)
+  end
+
+  def play_game
+    while @incorrect_guesses_left.positive?
       puts "\n----------------------------------------------------------------"
-      puts "Turn #{number_of_turns_played}"
-      number_of_turns_played += 1
+      puts "Turn #{@number_of_turns_played}"
+      @number_of_turns_played += 1
 
       puts "\n"
-      puts current_word_progress.chars.join(' ')
+      puts @current_word_progress.chars.join(' ')
 
-      unless incorrect_letters_guessed.empty?
-        puts "\n\nIncorrect letters: #{incorrect_letters_guessed.join(', ')}"
+      unless @incorrect_letters_guessed.empty?
+        puts "\n\nIncorrect letters: #{@incorrect_letters_guessed.join(', ')}"
       end
 
-      puts "\nYou have #{incorrect_guesses_left} incorrect guesses left."
+      puts "\nYou have #{@incorrect_guesses_left} incorrect guesses left."
 
-      player_guess = player.make_guess
+      player_guess = @player.make_guess
 
-      previous_word_progress = current_word_progress
-      current_word_progress = compare_guess_with_secret_word(player_guess, secret_word, current_word_progress)
+      previous_word_progress = @current_word_progress
+      @current_word_progress = compare_guess_with_secret_word(player_guess, @secret_word, @current_word_progress)
 
-      if current_word_progress == previous_word_progress
-        incorrect_guesses_left -= 1
-        incorrect_letters_guessed.push(player_guess) if player_guess.length == 1
+      if @current_word_progress == previous_word_progress
+        @incorrect_guesses_left -= 1
+        @incorrect_letters_guessed.push(player_guess) if player_guess.length == 1
       end
 
-      if current_word_progress == secret_word
-        player_has_won = true
+      if @current_word_progress == @secret_word
+        @player_has_won = true
         break
       end
+
+      object_state = to_json
+      p object_state
+      puts ""
+      p from_json(object_state)
     end
 
     puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    puts player_has_won ? 'You win!' : 'You lose!'
+    puts @player_has_won ? 'You win!' : 'You lose!'
 
-    puts "The secret word was #{secret_word}"
+    puts "The secret word was #{@secret_word}"
   end
 end
 
