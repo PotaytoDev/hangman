@@ -29,7 +29,6 @@ end
 
 class GameLogic
   def initialize
-    @player = Player.new
     @secret_word = list_of_possible_words.sample
     @current_word_progress = Array.new(@secret_word.length, '_').join
     @player_has_won = false
@@ -77,7 +76,24 @@ class GameLogic
     JSON.parse(json_string)
   end
 
+  def save_game(save_file)
+    File.open(save_file, 'w') do |file|
+      file.puts to_json
+    end
+  end
+
+  def load_game(save_file)
+    json_string = File.read(save_file)
+    loaded_save_file = from_json(json_string)
+
+    instance_variables.each do |variable|
+      instance_variable_set(variable, loaded_save_file[variable.to_s])
+    end
+  end
+
   def play_game
+    player = Player.new
+
     while @incorrect_guesses_left.positive?
       puts "\n----------------------------------------------------------------"
       puts "Turn #{@number_of_turns_played}"
@@ -92,7 +108,12 @@ class GameLogic
 
       puts "\nYou have #{@incorrect_guesses_left} incorrect guesses left."
 
-      player_guess = @player.make_guess
+      puts "\nSave game?"
+      if gets.chomp == 'y'
+        save_game('save_file.txt')
+      end
+
+      player_guess = player.make_guess
 
       previous_word_progress = @current_word_progress
       @current_word_progress = compare_guess_with_secret_word(player_guess, @secret_word, @current_word_progress)
@@ -106,11 +127,6 @@ class GameLogic
         @player_has_won = true
         break
       end
-
-      object_state = to_json
-      p object_state
-      puts ""
-      p from_json(object_state)
     end
 
     puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -120,4 +136,11 @@ class GameLogic
   end
 end
 
-GameLogic.new.play_game
+puts 'Load game?'
+if gets.chomp == 'y'
+  game = GameLogic.new
+  game.load_game('save_file.txt')
+  game.play_game
+else
+  GameLogic.new.play_game
+end
