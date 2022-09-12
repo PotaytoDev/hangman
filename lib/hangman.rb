@@ -28,7 +28,7 @@ class Player
 end
 
 class GameLogic
-  def initialize
+  def reset_game
     @secret_word = list_of_possible_words.sample
     @current_word_progress = Array.new(@secret_word.length, '_').join
     @player_has_won = false
@@ -91,6 +91,56 @@ class GameLogic
     end
   end
 
+  def play_again?
+    puts "\n\nPlay again? (Y/N)"
+
+    loop do
+      case gets.chomp.downcase
+      when 'y', 'yes'
+        return true
+      when 'n', 'no'
+        return false
+      else
+        puts 'Invalid input. Please enter y for yes and n for no.'
+      end
+    end
+  end
+
+  def display_menu
+    loop do
+      puts "\n\n========================="
+      puts '   Welcome to Hangman!!'
+      puts '========================='
+
+      puts "\n\n1) Start new game"
+      puts '2) Load game'
+
+      loop do
+        print "\nEnter your choice: "
+
+        case gets.chomp
+        when '1'
+          reset_game
+          play_game
+          break
+        when '2'
+          load_game('save_file.txt')
+          play_game
+          break
+        else
+          puts 'Invalid input. Please enter either 1 or 2.'
+        end
+      end
+
+      unless play_again?
+        puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        puts "Game Over"
+        puts "\nSee you next time!"
+        break
+      end
+    end
+  end
+
   def play_game
     player = Player.new
 
@@ -130,18 +180,11 @@ class GameLogic
       @number_of_turns_played += 1
     end
 
-    puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     puts @player_has_won ? 'You win!' : 'You lose!'
-
-    puts "The secret word was #{@secret_word}"
+    puts "The secret word was \"#{@secret_word}\""
+    puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   end
 end
 
-puts 'Load game?'
-if gets.chomp == 'y'
-  game = GameLogic.new
-  game.load_game('save_file.txt')
-  game.play_game
-else
-  GameLogic.new.play_game
-end
+GameLogic.new.display_menu
