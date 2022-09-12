@@ -12,8 +12,8 @@ class Player
   end
 
   def validate_player_guess(player_guess)
-    until guess_has_only_letters?(player_guess)
-      puts 'Invalid input. Please enter only letters in your guess.'
+    until guess_has_only_letters?(player_guess) || player_guess == '0'
+      puts 'Invalid input. Please enter only letters in your guess or 0 to save your game.'
       print 'Enter your guess: '
       player_guess = gets.chomp.downcase
     end
@@ -22,7 +22,7 @@ class Player
   end
 
   def make_guess
-    print "\n\nEnter your guess: "
+    print "\n\nEnter your guess or 0 to save the game: "
     @player_guess = validate_player_guess(gets.chomp.downcase)
   end
 end
@@ -97,7 +97,6 @@ class GameLogic
     while @incorrect_guesses_left.positive?
       puts "\n----------------------------------------------------------------"
       puts "Turn #{@number_of_turns_played}"
-      @number_of_turns_played += 1
 
       puts "\n"
       puts @current_word_progress.chars.join(' ')
@@ -108,12 +107,12 @@ class GameLogic
 
       puts "\nYou have #{@incorrect_guesses_left} incorrect guesses left."
 
-      puts "\nSave game?"
-      if gets.chomp == 'y'
-        save_game('save_file.txt')
-      end
-
       player_guess = player.make_guess
+
+      if player_guess == '0'
+        save_game('save_file.txt')
+        redo
+      end
 
       previous_word_progress = @current_word_progress
       @current_word_progress = compare_guess_with_secret_word(player_guess, @secret_word, @current_word_progress)
@@ -127,6 +126,8 @@ class GameLogic
         @player_has_won = true
         break
       end
+
+      @number_of_turns_played += 1
     end
 
     puts "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
