@@ -77,9 +77,25 @@ class GameLogic
     JSON.parse(json_string)
   end
 
-  def save_game(save_file)
-    File.open(save_file, 'w') do |file|
-      file.puts to_json
+  def save_game
+    loop do
+      print "\nEnter name for your save file (only letters and digits are allowed): "
+      save_file_name = gets.chomp
+
+      # Only allow letters and digits for the save file name
+      if save_file_name.match(/^[A-Za-z\d]+$/)
+        @game_was_saved = true
+
+        save_file_name += '.json'
+
+        File.open(save_file_name, 'w') do |file|
+          file.puts to_json
+        end
+
+        break
+      else
+        puts 'Invalid input. Enter only letters and digits for the save file name.'
+      end
     end
   end
 
@@ -114,10 +130,10 @@ class GameLogic
       puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
       puts "\nHere are your saved games:\n\n"
       saved_games.each_with_index do |save_file, index|
-        puts "#{index + 1}) #{save_file}"
+        puts "#{index + 1}) \"#{save_file.split('.').first}\""
       end
 
-      print "\n\nEnter the number of the game you want to load: "
+      print "\n\nEnter the number of the save file you want to load: "
       choice = gets.chomp.to_i - 1
 
       if choice >= 0 && choice < saved_games.length
@@ -195,8 +211,8 @@ class GameLogic
       player_guess = player.make_guess
 
       if player_guess == '0'
-        @game_was_saved = true
-        save_game('save_file.json')
+        save_game
+        puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         puts "\nGame saved!"
 
         loop do
