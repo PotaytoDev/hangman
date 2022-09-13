@@ -107,6 +107,31 @@ class GameLogic
     end
   end
 
+  def display_load_game_menu
+    saved_games = Dir.glob('*.json')
+
+    loop do
+      puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+      puts "\nHere are your saved games:\n\n"
+      saved_games.each_with_index do |save_file, index|
+        puts "#{index + 1}) #{save_file}"
+      end
+
+      print "\n\nEnter the number of the game you want to load: "
+      choice = gets.chomp.to_i - 1
+
+      if choice >= 0 && choice < saved_games.length
+        load_game(saved_games.at(choice))
+        puts "\nLoading game..."
+        sleep(3)
+        break
+      else
+        puts "\nInvalid input. Please enter one of the choices available."
+        sleep(3)
+      end
+    end
+  end
+
   def display_menu
     loop do
       puts "\n\n========================="
@@ -127,11 +152,12 @@ class GameLogic
         when '2'
           reset_game
 
-          if File.exist?('save_file.txt')
-            load_game('save_file.txt')
-          else
-            puts 'There is no saved game. Please start a new game.'
+          # Display load game menu unless there are no saved games
+          if Dir.glob('*.json').empty?
+            puts 'There are no saved games. Please start a new game.'
             redo
+          else
+            display_load_game_menu
           end
 
           play_game
@@ -170,7 +196,7 @@ class GameLogic
 
       if player_guess == '0'
         @game_was_saved = true
-        save_game('save_file.txt')
+        save_game('save_file.json')
         puts "\nGame saved!"
 
         loop do
