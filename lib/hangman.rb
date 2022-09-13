@@ -123,32 +123,43 @@ class GameLogic
     end
   end
 
-  def display_load_game_menu
+  def display_load_game_menu(saved_games)
+    puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    puts "\nHere are your saved games:\n\n"
+    saved_games.each_with_index do |save_file, index|
+      puts "#{index + 1}) \"#{save_file.split('.').first}\""
+    end
+
+    print "\n\nEnter the number of the save file you want to load,\n" \
+          "or type 'exit' to return to main menu: "
+  end
+
+  def game_was_loaded?
     saved_games = Dir.glob('*.json')
 
     loop do
-      puts "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-      puts "\nHere are your saved games:\n\n"
-      saved_games.each_with_index do |save_file, index|
-        puts "#{index + 1}) \"#{save_file.split('.').first}\""
-      end
+      display_load_game_menu(saved_games)
+      choice = gets.chomp
 
-      print "\n\nEnter the number of the save file you want to load: "
-      choice = gets.chomp.to_i - 1
+      return false if choice == 'exit'
+
+      choice = choice.to_i - 1
 
       if choice >= 0 && choice < saved_games.length
         load_game(saved_games.at(choice))
         puts "\nLoading game..."
         sleep(3)
-        break
+        return true
       else
         puts "\nInvalid input. Please enter one of the choices available."
-        sleep(3)
+        sleep(2)
       end
     end
   end
 
   def display_menu
+    returned_from_load_game_menu = false
+
     loop do
       puts "\n\n========================="
       puts '   Welcome to Hangman!!'
@@ -173,14 +184,22 @@ class GameLogic
             puts 'There are no saved games. Please start a new game.'
             redo
           else
-            display_load_game_menu
+            if game_was_loaded?
+              play_game
+            else
+              returned_from_load_game_menu = true
+            end
           end
 
-          play_game
           break
         else
           puts 'Invalid input. Please enter either 1 or 2.'
         end
+      end
+
+      if returned_from_load_game_menu
+        returned_from_load_game_menu = false
+        redo
       end
 
       unless play_again?
