@@ -255,7 +255,12 @@ class GameLogic
 
       if @current_word_progress == previous_word_progress
         @incorrect_guesses_left -= 1
-        @incorrect_letters_guessed.push(player_guess) if player_guess.length == 1
+
+        if player_guess.length == 1
+          unless @incorrect_letters_guessed.include?(player_guess) || @secret_word.include?(player_guess)
+            @incorrect_letters_guessed.push(player_guess)
+          end
+        end
       end
 
       if @current_word_progress == @secret_word
